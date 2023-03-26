@@ -1,27 +1,37 @@
----   
+---
+- name: Install python3-pip
+  ansible.builtin.apt:
+    name: python3-pip
+    state: present
+    become: true
+
 - name: Install gnu packages
   ansible.builtin.apt:
     name:
       - gnupg
-      - python3-pip
     state: present
-    
-- name: Install required Python library (pymongo) 
+    become: true
+
+- name: Install required Python library (pymongo)
   ansible.builtin.pip:
-    name: pymongo==4.3.3
-    
-- name: Import the MongoDB public GPG key
-  ansible.builtin.apt_key:
-    url: "https://www.mongodb.org/static/pgp/server-6.0.asc"
-    state: present
+    name: pymongo==3.13.0
+    executable: pip3
+    become: true
 
-- name: Add the MongoDB repository
-  ansible.builtin.apt_repository:
-    repo: 'deb http://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main'
-    state: present
-    update_cache: yes
-
-- name: Install MongoDB
+- name: Install mongodb-org
   ansible.builtin.apt:
-    name: "mongodb-org"
+    name: mongodb-org
     state: present
+    force_apt_get: yes
+    dpkg_options: force-confdef,force-confold
+    become: true
+
+- name: Fix broken packages
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    force_apt_get: yes
+    dpkg_options: force-confdef,force-confold
+    fix_missing: yes
+    force: yes
+    become: true
