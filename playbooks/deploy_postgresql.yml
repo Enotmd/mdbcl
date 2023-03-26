@@ -1,0 +1,13 @@
+---
+- name: Install and Configure PostgreSQL
+  hosts: postgresql-group
+  become: true
+  roles:
+    - role: roles/postgresql_install
+    - role: roles/postgresql_configure
+   
+  tags:
+    - deploy
+    - install
+    - configure
+    - validate

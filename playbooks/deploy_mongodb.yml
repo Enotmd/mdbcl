@@ -1,0 +1,7 @@
+---
+- name: Install and configure MongoDB cluster
+  hosts: mongodb
+  become: true
+  roles:
+    - mongodb_install
+    - mongodb_configure

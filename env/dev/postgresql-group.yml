@@ -1,0 +1,6 @@
+---
+db_name: test
+db_user: test
+db_password: { "vault_db_password" }
+postgresql_version: 13
+host_to_access_db: "0.0.0.0"

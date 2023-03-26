@@ -1,0 +1,20 @@
+---
+- name: Install python psycopg2
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Install PostgreSQL packages
+  apt:
+    name:
+      - postgresql-{{ postgresql_version }}
+      - postgresql-contrib-{{ postgresql_version }}
+    state: present
+    
+- name: start postgresql
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  become: true
+

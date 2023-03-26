@@ -1,0 +1,70 @@
+---
+# - name: Open port 27017 for MongoDB
+#   ansible.builtin.ufw:
+#     rule: allow
+#     port: 27017
+#     proto: tcp
+#   become: true
+#   when: "'mongodb_primary' in group_names or inventory_hostname in ['{{
+#     hostvars['18.130.118.188']['inventory_hostname'] }}', '{{
+#     hostvars['18.135.13.199']['inventory_hostname'] }}', '{{
+#     hostvars['35.177.210.113']['inventory_hostname'] }}']"
+
+- name: Configure the MongoDB primary instance
+  block:
+    - name: Modify the mongod configuration file
+      ansible.builtin.template:
+        src: mongod.conf.j2
+        dest: /etc/mongod.conf
+        mode: 644
+      become: true
+    - name: Restart the MongoDB service
+      ansible.builtin.systemd:
+        name: mongod
+        state: restarted
+      become: true
+  when: "'mongodb_primary' in group_names"
+
+- name: Configure the MongoDB secondary instances
+  block:
+    - name: Add the primary instance to the replica set
+      community.mongodb.mongodb_replicaset:
+        login_host: "{{ hostvars['18.130.118.188']['inventory_hostname'] }}"
+        replica_set: rs0
+        members:
+          - "{{ hostvars['18.130.118.188']['inventory_hostname'] }}"
+          - "{{ hostvars['18.135.13.199']['inventory_hostname'] }}"
+          - "{{ hostvars['35.177.210.113']['inventory_hostname'] }}"
+      when: inventory_hostname == hostvars['18.130.118.188']['inventory_hostname']
+
+# - name: Create admin user with role="root" for admin database
+#   community.mongodb.mongodb_user:
+#     login_host: localhost
+#     login_port: "27017"
+#     database: admin
+#     name: asd
+#     password: qwerty
+#     roles:
+#       - role: root
+#         db: admin
+#   run_once: true
+#   when: inventory_hostname == 'mongodb_node0'
+
+# - name: Create "dorin" database for user "dorin" with role "read"
+#   community.mongodb.mongodb_user:
+#     database: dorin
+#     name: dorin
+#     password: asd
+#     roles: read
+#     state: present
+#   run_once: true
+#   ignore_errors: true
+
+# - name: Create "user1" database for user "user1" with role "readwrite"
+#   community.mongodb.mongodb_user:
+#     database: dorin
+#     name: dorin
+#     password: asd
+#     roles: read
+#     state: present
+#   ignore_errors: true

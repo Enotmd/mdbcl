@@ -1,0 +1,14 @@
+---
+- name: restart postgresql
+  systemd:
+    name: mongod
+    state: restarted
+    enabled: yes
+  become: true
+
+- name: reload postgresql configuration
+  systemd:
+    name: postgresql{{ mongodb_version }}
+    state: reloaded
+    enabled: yes
+  become: true
